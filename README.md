@@ -1,16 +1,20 @@
 # playjim_infra
 playjim Infra repository by Dmitry Borisov
 ## Table of contents	
-- [HW2. ChatOps](#HW2.ChaOps.)
-	- [GIT](#GIT.)
-- [HW3. GCP: Bastion Host, Pritunl VPN.](#HW3.GCP:Bastion Host,PritunlVPN.)
+- [HW2. ChatOps](#HW2.ChaOps)
+	- [GIT](#GIT)
+- [HW3. GCP: Bastion Host, Pritunl VPN](#HW3.GCP:BastionHost,PritunlVPN)
 	- [Bastion-host](#Bastion-host)
-	- [VPN](VPN)
-
-# HW 2.ChatOps.
+	- [VPN](#VPN)
+- [HM4. GCP: Deploy test app, gcloud, ruby, MongoDB](#HM4.GCP:Deploytestapp,gcloud,ruby,MongoDB)
+	- [gcloud](#gcloud)
+	- [ruby](#ruby)
+	- [MongoDB](#MongoDB)
+	- [Deploy test app](#Deploytestapp)
+# HW2. ChatOps
 PR: https://github.com/Otus-DevOps-2019-08/playjim_infra/pull/1/files
 
-## GIT.
+## GIT
 
 git-clone - Clone a repository into a new directory
 ```sh
@@ -28,8 +32,8 @@ git commit -m 'Add PR template'
 git push --set-upstream origin play-travis
 ```
 
-# HW3. GCP: Bastion Host, Pritunl VPN.
-
+# HW3. GCP: Bastion Host, Pritunl VPN
+PR: https://github.com/Otus-DevOps-2019-08/playjim_infra/pull/2/files
 
 ## Bastion-host
 bastion_IP = 34.89.223.37
@@ -69,3 +73,10 @@ Host someinternalhost
 ## VPN
  - Файл setupvpn.sh описывает установку VPN-сервера, устанавливает mongod и pritunl
  - Файл cloud-bastion.ovpn - конф файл для настройки OpenVPN клиента
+
+# HM4. GCP: Deploy test app, gcloud, ruby, MongoDB
+PR: 
+
+# gcloud
+testapp_IP = 34.89.223.37
+testapp_port = 9292
