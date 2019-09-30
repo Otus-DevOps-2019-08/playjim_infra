@@ -1,12 +1,12 @@
 # playjim_infra
 playjim Infra repository by Dmitry Borisov
 ## Table of contents	
-- [HW2. ChatOps](#HW2.ChaOps)
+- [HW2. ChatOps](#HW2-ChaOps)
 	- [GIT](#GIT)
-- [HW3. GCP: Bastion Host, Pritunl VPN](#HW3.GCP:BastionHost,PritunlVPN)
+- [HW3. GCP: Bastion Host, Pritunl VPN](#HW3-GCP-BastionHost-PritunlVPN)
 	- [Bastion-host](#Bastion-host)
 	- [VPN](#VPN)
-- [HM4. GCP: Deploy test app, gcloud, ruby, MongoDB](#HM4.GCP:Deploytestapp,gcloud,ruby,MongoDB)
+- [HM4. GCP: Deploy test app, gcloud, ruby, MongoDB](#HM4-GCP-Deploytestapp-gcloud-ruby-MongoDB)
 	- [gcloud](#gcloud)
 	- [ruby](#ruby)
 	- [MongoDB](#MongoDB)
@@ -132,7 +132,7 @@ Check if the service is running:
 	$ systemctl status mongod.service
 	```
 
-##Deploy test app
+## Deploy test app
 Go to the home directory and copy the application code:
 ```sh
 $ cd ~
@@ -153,7 +153,7 @@ playjim  19187  0.0  1.8 652624 32204 ?        Sl   18:49   0:03 puma 3.10.0 (tc
 playjim  20776  0.0  0.0  12944   904 pts/0    S+   21:08   0:00 grep --color=auto puma
 ```
 
-##Bash script
+## Bash script
 install_ruby.sh
 ```sh
 #!/bin/bash
@@ -217,7 +217,7 @@ gcloud compute instances create test-startup\
   --metadata startup-script='gsutil cp gs://playjim-bucket/startup.sh startup.sh;chmod +x startup.sh;./startup.sh'
 ```
 
-##gcloud firewall
+## gcloud firewall
 Открытие порта через gcloud:
 ```sh
 gcloud compute firewall-rules create default-puma-server\
