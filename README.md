@@ -1,7 +1,7 @@
 # playjim_infra
 playjim Infra repository by Dmitry Borisov
 ## Table of contents	
-- [HW2. ChatOps](#HW2-ChaOps)
+- [HW2. ChatOps](#HW2-ChatOps)
 	- [GIT](#GIT)
 - [HW3. GCP: Bastion Host, Pritunl VPN](#HW3-GCP-BastionHost-PritunlVPN)
 	- [Bastion-host](#Bastion-host)
