@@ -3,10 +3,10 @@ playjim Infra repository by Dmitry Borisov
 ## Table of contents	
 - [HW2. ChatOps](#HW2-ChatOps)
 	- [GIT](#GIT)
-- [HW3. GCP: Bastion Host, Pritunl VPN](#HW3-GCP-BastionHost-PritunlVPN)
+- [HW3. GCP: Bastion Host, Pritunl VPN](#HW3-GCP-Bastion-Host-Pritunl-VPN)
 	- [Bastion-host](#Bastion-host)
 	- [VPN](#VPN)
-- [HM4. GCP: Deploy test app, gcloud, ruby, MongoDB](#HM4-GCP-Deploytestapp-gcloud-ruby-MongoDB)
+- [HM4. GCP: Deploy test app, gcloud, ruby, MongoDB](#HM4-GCP-Deploy-test-app-gcloud-ruby-MongoDB)
 	- [gcloud](#gcloud)
 	- [ruby](#ruby)
 	- [MongoDB](#MongoDB)
