@@ -10,9 +10,9 @@ playjim Infra repository by Dmitry Borisov
 	- [gcloud](#gcloud)
 	- [ruby](#ruby)
 	- [MongoDB](#MongoDB)
-	- [Deploy test app](#Deploytestapp)
-	- [Bash script](#Bashscript)
-	- [gcloud firewall](#gcloudfirewall)
+	- [Deploy test app](#Deploy-test-app)
+	- [Bash script](#Bash-script)
+	- [gcloud firewall](#gcloud-firewall)
 # HW2. ChatOps
 PR: https://github.com/Otus-DevOps-2019-08/playjim_infra/pull/1/files
 
