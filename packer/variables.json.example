@@ -1,0 +1,9 @@
+{
+   "project_id": "infra-******",
+   "machine-type": "f1-big",
+   "source_image": "ubuntu-****-lts",
+   "disk_size": "10",
+   "disk_type": "pd-ssd",
+   "network": "example",
+   "tags": "project1"
+}
