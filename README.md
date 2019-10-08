@@ -234,17 +234,17 @@ gcloud compute firewall-rules create default-puma-server\
   --target-tags puma-server
 ```
 
-#HW5. GCP: Build an Image, packer
-PR:
+# HW5. GCP: Build an Image, packer
+PR: https://github.com/Otus-DevOps-2019-08/playjim_infra/pull/4/files
 
-##Packer
+## Packer
 Скачал и распоковал архив packer. Поместил содержимое в /usr/sbin/.
 ```sh
 $ packer -v
 1.4.4
 ```
 
-##ADC
+## ADC
 Application Default Credentials
 Для создания ADC:
 ```sh
