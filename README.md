@@ -1,22 +1,23 @@
 # playjim_infra
 playjim Infra repository by Dmitry Borisov
 ## Table of contents	
-- [HW2. ChatOps](#HW2.ChaOps)
+- [HW2. ChatOps](#HW2-ChatOps)
 	- [GIT](#GIT)
-- [HW3. GCP: Bastion Host, Pritunl VPN](#HW3.GCP:BastionHost,PritunlVPN)
+- [HW3. GCP: Bastion Host, Pritunl VPN](#HW3-GCP-Bastion-Host-Pritunl-VPN)
 	- [Bastion-host](#Bastion-host)
 	- [VPN](#VPN)
-- [HM4. GCP: Deploy test app, gcloud, ruby, MongoDB](#HM4.GCP:Deploytestapp,gcloud,ruby,MongoDB)
+- [HM4. GCP: Deploy test app, gcloud, ruby, MongoDB](#HM4-GCP-Deploy-test-app-gcloud-ruby-MongoDB)
 	- [gcloud](#gcloud)
 	- [ruby](#ruby)
 	- [MongoDB](#MongoDB)
-	- [Deploy test app](#Deploytestapp)
-	- [Bash script](#Bashscript)
-	- [gcloud firewall](#gcloudfirewall)
-- [HW5. GCP: Build an Image, Packer](#HW5.GCP:BuildanImage,Packer)
+	- [Deploy test app](#Deploy-test-app)
+	- [Bash script](#Bash-script)
+	- [gcloud firewall](#gcloud-firewall)
+- [HW5. GCP: Build an Image, Packer](#HW5-GCP-Build-an-Image-Packer)
 	- [Packer](#Packer)
 	- [ADC](#ADC)
-	- [Доп. задание](#Доп.задание)
+	- [Доп. задание](#Доп-задание)
+  
 # HW2. ChatOps
 PR: https://github.com/Otus-DevOps-2019-08/playjim_infra/pull/1/files
 
@@ -136,7 +137,7 @@ Check if the service is running:
 	$ systemctl status mongod.service
 	```
 
-##Deploy test app
+## Deploy test app
 Go to the home directory and copy the application code:
 ```sh
 $ cd ~
@@ -157,7 +158,7 @@ playjim  19187  0.0  1.8 652624 32204 ?        Sl   18:49   0:03 puma 3.10.0 (tc
 playjim  20776  0.0  0.0  12944   904 pts/0    S+   21:08   0:00 grep --color=auto puma
 ```
 
-##Bash script
+## Bash script
 install_ruby.sh
 ```sh
 #!/bin/bash
@@ -221,7 +222,7 @@ gcloud compute instances create test-startup\
   --metadata startup-script='gsutil cp gs://playjim-bucket/startup.sh startup.sh;chmod +x startup.sh;./startup.sh'
 ```
 
-##gcloud firewall
+## gcloud firewall
 Открытие порта через gcloud:
 ```sh
 gcloud compute firewall-rules create default-puma-server\
