@@ -13,6 +13,11 @@ playjim Infra repository by Dmitry Borisov
 	- [Deploy test app](#Deploy-test-app)
 	- [Bash script](#Bash-script)
 	- [gcloud firewall](#gcloud-firewall)
+- [HW5. GCP: Build an Image, Packer](#HW5-GCP-Build-an-Image-Packer)
+	- [Packer](#Packer)
+	- [ADC](#ADC)
+	- [Доп. задание](#Доп-задание)
+  
 # HW2. ChatOps
 PR: https://github.com/Otus-DevOps-2019-08/playjim_infra/pull/1/files
 
@@ -77,7 +82,7 @@ Host someinternalhost
  - Файл cloud-bastion.ovpn - конф файл для настройки OpenVPN клиента
 
 # HM4. GCP: Deploy test app, gcloud, ruby, MongoDB
-PR: 
+PR: https://github.com/Otus-DevOps-2019-08/playjim_infra/pull/3/files
 GitHub gist: https://gist.github.com/Nklya/b6d1a547415b123f6b0cd0e90d208bf8
 
 ## gcloud
@@ -228,3 +233,70 @@ gcloud compute firewall-rules create default-puma-server\
   --priority 1000\
   --target-tags puma-server
 ```
+
+#HW5. GCP: Build an Image, packer
+PR:
+
+##Packer
+Скачал и распоковал архив packer. Поместил содержимое в /usr/sbin/.
+```sh
+$ packer -v
+1.4.4
+```
+
+##ADC
+Application Default Credentials
+Для создания ADC:
+```sh
+$ gcloud auth application-default login
+```
+
+В директорию confg-scripts/ перенесены файлы:
+deploy.sh
+install_mongodb.sh
+install_ruby.sh
+startup.sh
+
+Packer шаблон, с помощью которого собираем *baked-образ* с предустановленными Ruby и MongoDB - packer/ubuntu16.json  
+В секции **builders** описано создание ВМ для билда и создание имиджа.  
+В секции **provisioners** описана установка ПО, настройка системы и конфигурация приложений.  
+В секции **variables** описаны пользовательские переменные.
+
+В каталог packer/scripts/ (указан в provisioners) скопированы скрипты установки mongodb и ruby:  
+install_mongodb.sh  
+install_ruby.sh  
+
+Валидация шаблона и построение образа ВМ:
+```sh 
+$ packer validate -var-file variables.json ubuntu16.json
+Template validated successfully.
+$ packer build -var-file variables.json ubuntu16.json
+```
+
+Устанавливаем инстанс из собранного образа.
+Установка и запуск приложения:
+```sh
+$ ssh playjim@34.76.161.61
+$ cd ~
+$ gsutil cp gs://playjim-bucket/deploy.sh ~/
+$ sudo chmod +x deploy.sh
+$ ./deploy.sh
+```
+В файл *packer/variables.json* заданы обязательные переменные и файл добавлен в .gitignore до его индексации.
+
+## Доп. задание 
+"Запекаем" (bake) в образ VM все зависимости приложения и сам код приложения:
+ - За основу шаблона взял **ubuntu16.json**. Внёс изменения в "image_family": "reddit-full"
+ - В файле packer/files/deploy.sh описана установка приложения, создание systemd unit и запуск приложения.
+ - Запуск постройки образа:  
+ ```sh
+ packer build -var-file variables.json immutable.json
+ ``` 
+ - Создание ВМ из подготовленного образа из семейства reddit-full (скрипт лежит в файле config-scripts/create-reddit-vm.sh):  
+ ```sh
+!#!/bin/bash
+gcloud compute instances create reddit-app-full\
+  --image-family reddit-full\
+  --tags puma-server\
+  --restart-on-failure
+ ```
