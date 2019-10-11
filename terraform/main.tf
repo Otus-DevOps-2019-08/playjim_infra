@@ -26,7 +26,7 @@ resource "google_compute_instance" "app" {
   }
   metadata = {
     # путь до публичного ключа
-    ssh-keys = "playjim:${file(var.public_key_path)}"
+    ssh-keys = "appuser:${file(var.public_key_path)}"
   }
   # определение сетевого интерфейса
   network_interface {
@@ -38,7 +38,7 @@ resource "google_compute_instance" "app" {
   connection {
     type  = "ssh"
     host  = self.network_interface[0].access_config[0].nat_ip
-    user  = "playjim"
+    user  = "appuser"
     agent = false
     # путь до приватного ключа
     private_key = file(var.private_key)
@@ -73,7 +73,7 @@ resource "google_compute_firewall" "firewall_puma" {
 # Добавление публичного ключа пользователся в проект.
 resource "google_compute_project_metadata" "ssh_keys" {
   metadata = {
-    ssh-keys = "playjim1:${file(var.public_key_path)} playjim2:${file(var.public_key_path)}"
+    ssh-keys = "appuser1:${file(var.public_key_path)} appuser2:${file(var.public_key_path)}"
   }
 }
 

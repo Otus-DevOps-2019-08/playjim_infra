@@ -62,29 +62,29 @@ $ ssh-add -L
 ```
 Key:
 ```sh
-$ ssh-add ~/.ssh/d.borisov
+$ ssh-add ~/.ssh/appuser
 ```
 SSH Connection:
 ```sh
-$ ssh -i ~/.ssh/d.borisov -A playjim@34.89.223.37
+$ ssh -i ~/.ssh/appuser -A playjim@34.89.223.37
 $ ssh 10.156.0.11
 ```
 Для подключения одной строкой к someinternalhost использовал :
 ```sh
-$ ssh -i ~/.ssh/d.borisov -A playjim@34.89.223.37 -tt ssh 10.156.0.11
+$ ssh -i ~/.ssh/appuser -A playjim@34.89.223.37 -tt ssh 10.156.0.11
 ```
 Для подключения к someinternalhost таким образом - ssh someinternalhost - настроил .ssh/config:
 ```sh
 Host bastion
   Hostname 34.89.223.37
   User playjim
-  IdentityFile ~/.ssh/d.borisov
+  IdentityFile ~/.ssh/appuser
 
 Host someinternalhost
   Hostname 10.156.0.11
   User playjim
   ProxyCommand ssh -W %h:%p bastion
-  IdentityFile ~/.ssh/d.borisov
+  IdentityFile ~/.ssh/appuser
 ```
 
 ## VPN
@@ -313,7 +313,7 @@ gcloud compute instances create reddit-app-full\
 
 # HW6. Terraform-1
 
- - Удалил ключ ползователя playjim из GCP  
+ - Удалил ключ ползователя appuser из GCP  
  - Скачал terraform, распоковал и поместил в /usr/sbin
 ```sh
 $ terraform -v
@@ -423,7 +423,7 @@ resource "google_compute_instance" "app" {
 ...
   metadata = {
     # путь до публичного ключа
-    ssh-keys = "playjim:${file("~/.ssh/d.borisov.pub")}"
+    ssh-keys = "appuser:${file("~/.ssh/appuser.pub")}"
   }
 ...
 }
@@ -497,8 +497,8 @@ After=network.target
 
 [Service]
 Type=simple
-User=playjim
-WorkingDirectory=/home/playjim/reddit
+User=appuser
+WorkingDirectory=/home/appuser/reddit
 ExecStart=/bin/bash -lc 'puma'
 Restart=always
 
@@ -590,14 +590,14 @@ boot_disk {
 }
 ...
 metadata = {
-  ssh-keys = "playjim:${file(var.public_key_path)}"
+  ssh-keys = "appuser:${file(var.public_key_path)}"
 }
 ...
 ```
  - Далее определим переменные используя специальный файл **terraform.tfvars**:
 ```sh
 project = "infra-254011"
-public_key_path = "~/.ssh/d.borisov.pub"
+public_key_path = "~/.ssh/appuser.pub"
 disk_image = "reddit-base"
 ```
 ## The final test
@@ -644,19 +644,19 @@ variable private_key {
  connection {
     type  = "ssh"
     host  = self.network_interface[0].access_config[0].nat_ip
-    user  = "playjim"
+    user  = "appuser"
     agent = false
     # путь до приватного ключа
     private_key = file(var.private_key)
   }
 ```
-	 private_key = file("~/.ssh/d.borisov")
+	 private_key = file("~/.ssh/appuser")
  - Определил переменные в файле terraform.tfvars:
 ```sh
 project         = "infra-254011"
-public_key_path = "~/.ssh/d.borisov.pub"
+public_key_path = "~/.ssh/appuser.pub"
 disk_image      = "reddit-base"
-private_key     = "~/.ssh/d.borisov"
+private_key     = "~/.ssh/appuser"
 ```
  2. Определил input переменную для задания зоны в ресурсе "google_compute_instance" "app".
 Дал значение по умолчанию:
@@ -692,11 +692,11 @@ disk_image = "reddit-base"
 ```
 
 ## Доп. задание
- - Добавление ключа пользователя playjim1 в метаданные проекта:
+ - Добавление ключа пользователя appuser1 в метаданные проекта:
 ```sh
 resource "google_compute_project_metadata" "ssh_keys" {
   metadata = {
-    ssh-keys = "playjim1:${file(var.public_key_path)}"
+    ssh-keys = "appuser1:${file(var.public_key_path)}"
   }
 }
 ```
@@ -705,7 +705,7 @@ resource "google_compute_project_metadata" "ssh_keys" {
 ```sh
 resource "google_compute_project_metadata" "ssh_keys" {
   metadata = {
-    ssh-keys = "playjim1:${file(var.public_key_path)} playjim2:${file(var.public_key_path)}"
+    ssh-keys = "appuser1:${file(var.public_key_path)} appuser2:${file(var.public_key_path)}"
   }
 }
 ```
