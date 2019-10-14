@@ -1,9 +1,9 @@
 terraform {
   # Версия terraform
   required_version = "~> 0.12"
-required_providers {
-google="~>2.7"
-}
+  required_providers {
+    google = "~>2.7"
+  }
 }
 
 provider "google" {
@@ -74,9 +74,9 @@ resource "google_compute_firewall" "firewall_puma" {
 }
 
 # Добавление публичного ключа пользователся в проект.
-resource "google_compute_project_metadata" "ssh_keys" {
-  metadata = {
-    ssh-keys = "appuser1:${file(var.public_key_path)} appuser2:${file(var.public_key_path)}"
-  }
+resource "google_compute_project_metadata_item" "ssh-keys" {
+  key   = "ssh-keys"
+  value = join("\n", var.ssh_keys)
 }
+
 

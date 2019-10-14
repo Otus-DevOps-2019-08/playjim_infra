@@ -20,3 +20,6 @@ variable zone_default {
   description = "zone"
   default     = "europe-west1-b"
 }
+variable ssh_keys {
+  description = "Users ssh-keys. Format -> user:ssh-key"
+}
