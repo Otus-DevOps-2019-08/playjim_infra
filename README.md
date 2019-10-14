@@ -694,19 +694,17 @@ disk_image = "reddit-base"
 ## Доп. задание
  - Добавление ключа пользователя appuser1 в метаданные проекта:
 ```sh
-resource "google_compute_project_metadata" "ssh_keys" {
-  metadata = {
-    ssh-keys = "appuser1:${file(var.public_key_path)}"
-  }
+resource "google_compute_project_metadata_item" "ssh-keys" {
+  key   = "ssh-keys"
+  value = "appuser1:${file(var.public_key_path)}"
 }
 ```
 
  - Добавление нескольких ключей в метаданные проекта:
 ```sh
-resource "google_compute_project_metadata" "ssh_keys" {
-  metadata = {
-    ssh-keys = "appuser1:${file(var.public_key_path)} appuser2:${file(var.public_key_path)}"
-  }
+resource "google_compute_project_metadata_item" "ssh-keys" {
+  key   = "ssh-keys"
+  value = join("\n", var.ssh_keys)
 }
 ```
  - При добавлении ssh ключа в метаданные проекта через web, после принятия конфига main.tf ssh-ключ добавленный через web был удален.
