@@ -1,7 +1,7 @@
 # playjim_infra
 playjim Infra repository by Dmitry Borisov
 ## Table of contents	
-- [HW2. ChatOps](#HW2-ChaOps)
+- [HW2. ChatOps](#HW2-ChatOps)
 	- [GIT](#GIT)
 - [HW3. GCP: Bastion Host, Pritunl VPN](#HW3-GCP-Bastion-Host-Pritunl-VPN)
 	- [Bastion-host](#Bastion-host)
@@ -11,7 +11,7 @@ playjim Infra repository by Dmitry Borisov
 	- [ruby](#ruby)
 	- [MongoDB](#MongoDB)
 	- [Deploy test app](#Deploy-test-app)
-	- [Bash script](#Bashs-cript)
+	- [Bash script](#Bash-script)
 	- [gcloud firewall](#gcloud-firewall)
 - [HW5. GCP: Build an Image, Packer](#HW5-GCP-Build-an-Image-Packer)
 	- [Packer](#Packer)
