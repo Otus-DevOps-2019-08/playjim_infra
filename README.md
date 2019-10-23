@@ -23,6 +23,10 @@ playjim Infra repository by Dmitry Borisov
 	- [The final test](#The-final-test)
 	- [Самостоятельная работа](#Самостоятельная-работа)
 	- [Доп. задание](#Доп-задание)
+- [HW7. Terraform-2](#HW7-Terraform-2)
+	- [Самостоятельное задание](#Самостоятельное-задание)
+	- [Модуль storage-bucket](#Модуль-storage-bucket)
+	
 # HW2. ChatOps
 PR: https://github.com/Otus-DevOps-2019-08/playjim_infra/pull/1/files
 
@@ -312,6 +316,7 @@ gcloud compute instances create reddit-app-full\
  ```
 
 # HW6. Terraform-1
+PR: https://github.com/Otus-DevOps-2019-08/playjim_infra/pull/6
 
  - Удалил ключ ползователя appuser из GCP  
  - Скачал terraform, распоковал и поместил в /usr/sbin
@@ -708,5 +713,93 @@ resource "google_compute_project_metadata_item" "ssh-keys" {
 }
 ```
  - При добавлении ssh ключа в метаданные проекта через web, после принятия конфига main.tf ssh-ключ добавленный через web был удален.
+
+#HW7. Terraform-2
+PR:
+
+`terraform import` - добавляет информацию о созданном без помощи Terraform ресурсе в state файл.
+
+Пример:
+
+```sh
+$ terraform import google_compute_firewall.firewall_ssh default-allow-ssh
+```
+
+`terraform get` - загрузка модулей из указанного источника source.
+
+##Самостоятельное задание
+
+Создал модуль **vpc** в директории *modules/vpc/*:
+
+**main.tf**
+
+```sh
+# vpc.tf
+resource "google_compute_firewall" "firewall_ssh" {
+  name    = "default-allow-ssh"
+  network = "default"
+  allow {
+    protocol = "tcp"
+    ports    = ["22"]
+  }
+  source_ranges = var.source_ranges
+}
+```
+
+**variables.tf**
+
+```sh
+variable source_ranges {
+  description = "Allowed IP addresses"
+  default     = ["0.0.0.0/0"]
+}
+```
+
+Секция вызова модуля **vpc**
+
+```sh
+module "vpc" {
+  source        = "../modules/vpc"
+  source_ranges = ["0.0.0.0/0"]
+}
+
+```
+
+## Модуль storage-bucket
+
+**storage-bucket.tf**
+
+```sh
+provider "google" {
+  version = "~> 2.15"
+  project = var.project
+  region  = var.region
+}
+
+module "storage-bucket" {
+  source  = "SweetOps/storage-bucket/google"
+  version = "0.3.0"
+  location = var.region
+  # Èìÿ ïîìåíÿéòå íà äðóãîå
+  name = "storage-bucket-testplayjim"
+}
+
+output storage-bucket_url {
+  value = module.storage-bucket.url
+}
+```
+
+**variable.tf**
+
+```sh
+variable project {
+  description = "Project ID"
+}
+variable region {
+  description = "Region"
+  default     = "europe-west1"
+}
+```
+
 
 
