@@ -1,7 +1,7 @@
 # playjim_infra
 playjim Infra repository by Dmitry Borisov
 ## Table of contents	
-- [HW2. ChatOps](#HW2-ChaOps)
+- [HW2. ChatOps](#HW2-ChatOps)
   - [GIT](#GIT)
 
 - [HW3. GCP: Bastion Host, Pritunl VPN](#HW3-GCP-Bastion-Host-Pritunl-VPN)
@@ -32,7 +32,7 @@ playjim Infra repository by Dmitry Borisov
 	- [Самостоятельное задание](#Самостоятельное-задание)
 	- [Модуль storage-bucket](#Модуль-storage-bucket)
 	
-- [HW8. Ansible-1](#HM8-Ansible-1)
+- [HW8. Ansible-1](#HW8-Ansible-1)
 	- [Работа с группами хостов](#Работа-с-группами-хостов)
 	- [YAML inventory](#YAML-inventory)
 	- [Playbook](#Playbook)
