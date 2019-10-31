@@ -2,10 +2,11 @@
 playjim Infra repository by Dmitry Borisov
 ## Table of contents	
 - [HW2. ChatOps](#HW2-ChatOps)
-	- [GIT](#GIT)
+  - [GIT](#GIT)
 - [HW3. GCP: Bastion Host, Pritunl VPN](#HW3-GCP-Bastion-Host-Pritunl-VPN)
-	- [Bastion-host](#Bastion-host)
-	- [VPN](#VPN)
+  - [Bastion-host](#Bastion-host)
+  - [VPN](#VPN)
+
 - [HM4. GCP: Deploy test app, gcloud, ruby, MongoDB](#HM4-GCP-Deploy-test-app-gcloud-ruby-MongoDB)
 	- [gcloud](#gcloud)
 	- [ruby](#ruby)
@@ -14,20 +15,27 @@ playjim Infra repository by Dmitry Borisov
 	- [Bash script](#Bash-script)
 	- [gcloud firewall](#gcloud-firewall)
 - [HW5. GCP: Build an Image, Packer](#HW5-GCP-Build-an-Image-Packer)
-	- [Packer](#Packer)
-	- [ADC](#ADC)
-	- [Доп. задание](#Доп-задание)
+  - [Packer](#Packer)
+  - [ADC](#ADC)
+  - [Доп. задание](#Доп-задание)
+
 - [HW6. Terraform-1](#HW6-Terraform-1)
-	- [Input vars](#Input-vars)
-	- [Output vars](#Output-vars)
-	- [The final test](#The-final-test)
-	- [Самостоятельная работа](#Самостоятельная-работа)
-	- [Доп. задание](#Доп-задание)
+  - [Input vars](#Input-vars)
+  - [Output vars](#Output-vars)
+  - [The final test](#The-final-test)
+  - [Самостоятельная работа](#Самостоятельная-работа)
+  - [Доп. задание](#Доп-задание)
+
 - [HW7. Terraform-2](#HW7-Terraform-2)
 	- [Самостоятельное задание](#Самостоятельное-задание)
 	- [Модуль storage-bucket](#Модуль-storage-bucket)
 	
+- [HW8. Ansible-1](#HW8-Ansible-1)
+	- [Работа с группами хостов](#Работа-с-группами-хостов)
+	- [YAML inventory](#YAML-inventory)
+	- [Playbook](#Playbook)
 # HW2. ChatOps
+
 PR: https://github.com/Otus-DevOps-2019-08/playjim_infra/pull/1/files
 
 ## GIT
@@ -714,8 +722,8 @@ resource "google_compute_project_metadata_item" "ssh-keys" {
 ```
  - При добавлении ssh ключа в метаданные проекта через web, после принятия конфига main.tf ssh-ключ добавленный через web был удален.
 
-#HW7. Terraform-2
-PR:
+# HW7. Terraform-2
+PR: https://github.com/Otus-DevOps-2019-08/playjim_infra/pull/7
 
 `terraform import` - добавляет информацию о созданном без помощи Terraform ресурсе в state файл.
 
@@ -727,7 +735,7 @@ $ terraform import google_compute_firewall.firewall_ssh default-allow-ssh
 
 `terraform get` - загрузка модулей из указанного источника source.
 
-##Самостоятельное задание
+## Самостоятельное задание
 
 Создал модуль **vpc** в директории *modules/vpc/*:
 
@@ -802,4 +810,172 @@ variable region {
 ```
 
 
+
+# HW8. Ansible-1
+
+PR:
+
+
+
+Установил *ansible* `$ sudo apt install ansible`
+
+Создал файл   **inventory** с содержимом:
+
+```sh
+appserver ansible_host=35.187.86.149 ansible_user=appuser \ ansible_private_key_file=~/.ssh/appuser
+```
+
+Проверил может ли ansible управлять хостом *appserver* 
+
+```sh
+$ ansible appserver -i ./inventory -m ping
+appserver | SUCCESS => {
+    "ansible_facts": {
+        "discovered_interpreter_python": "/usr/bin/python"
+    },
+    "changed": false,
+    "ping": "pong"
+}
+```
+
+В **inventory** внес также хост *dbserver*:
+
+```sh
+dbserver ansible_host=35.241.234.153 ansible_user=appuser \ ansible_private_key_file=~/.ssh/appuser
+```
+
+Проверил ssh соединение через *ansible* к хосту *dbserver*
+```sh
+$ ansible dbserver -i inventory -m ping
+dbserver | SUCCESS => {
+    "ansible_facts": {
+        "discovered_interpreter_python": "/usr/bin/python"
+    },
+    "changed": false,
+    "ping": "pong"
+}
+```
+
+Создал для настройки Ansible конфиг файл **ansible.cfg** с содержимом:
+```sh
+[defaults]
+inventory = ./inventory
+remote_user = appuser
+private_key_file = ~/.ssh/appuser
+host_key_checking = False
+retry_files_enabled = False
+```
+
+Отредактировал файл **inventory**:
+```sh
+appserver ansible_host=35.187.86.149
+dbserver ansible_host=35.241.234.153
+```
+
+Проверил работу использовав модуль *command*:
+```sh
+$ ansible dbserver -m command -a uptime
+dbserver | CHANGED | rc=0 >>
+ 12:50:53 up 54 min,  1 user,  load average: 0.00, 0.00, 0.00
+```
+
+## Работа с группами хостов
+
+Распределил хосты по группам:
+```sh
+[app] #Название группы
+appserver ansible_host=35.187.86.149 #Список хостов в данной группе
+
+[db]
+dbserver ansible_host=35.241.234.153
+```
+Обращаемся к группе хостов:
+```sh
+$ ansible db -m command -a uptime
+dbserver | CHANGED | rc=0 >>
+ 13:30:23 up  1:33,  1 user,  load average: 0.00, 0.00, 0.00
+```
+
+## YAML inventory
+
+Создал файл **inventory.yml**:
+```sh
+app: #Название группы
+  hosts: #Список хостов
+    appserver: #Название хоста
+      ansible_host: 35.187.86.149
+db:
+  hosts:
+    dbserver:
+      ansible_host: 35.241.234.153
+```
+
+Проверяем:
+```sh
+$ ansible all -m ping -i inventory.yml
+dbserver | SUCCESS => {
+    "ansible_facts": {
+        "discovered_interpreter_python": "/usr/bin/python"
+    },
+    "changed": false,
+    "ping": "pong"
+}
+appserver | SUCCESS => {
+    "ansible_facts": {
+        "discovered_interpreter_python": "/usr/bin/python"
+    },
+    "changed": false,
+    "ping": "pong"
+}
+```
+
+## Playbook
+
+Создал файл **ansible.clone.yml**:
+```sh
+---
+- name: Clone
+  hosts: app
+  tasks:
+    - name: Clone repo
+      git:
+        repo: https://github.com/express42/reddit.git
+        dest: /home/appuser/reddit
+```
+Выполнил:
+```sh
+$ ansible-playbook clone.yml
+
+PLAY [Clone] *********************************************************************************************************
+
+TASK [Gathering Facts] ***********************************************************************************************
+ok: [appserver]
+
+TASK [Clone repo] ****************************************************************************************************
+ok: [appserver]
+
+PLAY RECAP ***********************************************************************************************************
+appserver                  : ok=2    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+```
+Как видим изменений 0, потому что репозиторий уже клонирован.
+
+Теперь на хосте *app* удалим директорию с репозиторием и повторно выполнил клонирование:
+```sh
+$ ansible app -m command -a 'rm -rf ~/reddit'
+appserver | CHANGED | rc=0 >>
+$ ansible-playbook clone.yml
+
+PLAY [Clone] *********************************************************************************************************
+
+TASK [Gathering Facts] ***********************************************************************************************
+ok: [appserver]
+
+TASK [Clone repo] ****************************************************************************************************
+changed: [appserver]
+
+PLAY RECAP ***********************************************************************************************************
+appserver                  : ok=2    changed=1    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+
+```
+Репозиторий клонирован. Одно изменение применено.
 
