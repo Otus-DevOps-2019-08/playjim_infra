@@ -1,0 +1,15 @@
+---
+plugin: gcp_compute
+projects:
+  - <gcp_project_id>
+regions:
+  - <gcp_project_region>
+keyed_groups:
+  - key: zone
+groups:
+  web-servers: "'-web-' in name"
+hostnames:
+  - name
+filters: []
+auth_kind: serviceaccount
+service_account_file: <service_account_file>.json

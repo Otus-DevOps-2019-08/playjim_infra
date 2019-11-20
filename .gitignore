@@ -5,3 +5,4 @@
 *.tfvars
 .terraform/
 *.retry
+inventory.gcp.yaml
