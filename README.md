@@ -44,7 +44,7 @@ playjim Infra repository by Dmitry Borisov
 	- [Один плейбук, несколько сценариев](#Один-плейбук-несколько-сценариев)
 	- [Несколько плейбуков](#Несколько-плейбуков)
 	- [Провижинг в Packer](#Провижинг-в-Packer)
-	- [Задание со *](#Задание-со-*)
+	- [Задание с *](#Задание-с-*)
   
 # HW2. ChatOps
 
@@ -68,7 +68,7 @@ git commit -m 'Add PR template'
 git push --set-upstream origin play-travis
 ```
 
-[Содержание](##Table-of-contents)
+[Содержание](#Table-of-contents)
 
 # HW3. GCP: Bastion Host, Pritunl VPN
 PR: https://github.com/Otus-DevOps-2019-08/playjim_infra/pull/2/files
@@ -117,7 +117,7 @@ Host someinternalhost
  - Файл setupvpn.sh описывает установку VPN-сервера, устанавливает mongod и pritunl
  - Файл cloud-bastion.ovpn - конф файл для настройки OpenVPN клиента
 
-[Содержание](##Table-of-contents)
+[Содержание](#Table-of-contents)
 
 # HM4. GCP: Deploy test app, gcloud, ruby, MongoDB
 PR: https://github.com/Otus-DevOps-2019-08/playjim_infra/pull/3/files
@@ -272,7 +272,7 @@ gcloud compute firewall-rules create default-puma-server\
   --target-tags puma-server
 ```
 
-[Содержание](##Table-of-contents)
+[Содержание](#Table-of-contents)
 
 # HW5. GCP: Build an Image, packer
 PR: https://github.com/Otus-DevOps-2019-08/playjim_infra/pull/4/files
@@ -341,7 +341,7 @@ gcloud compute instances create reddit-app-full\
   --restart-on-failure
  ```
 
-[Содержание](##Table-of-contents)
+[Содержание](#Table-of-contents)
 
 # HW6. Terraform-1
 PR: https://github.com/Otus-DevOps-2019-08/playjim_infra/pull/6
@@ -742,7 +742,7 @@ resource "google_compute_project_metadata_item" "ssh-keys" {
 ```
  - При добавлении ssh ключа в метаданные проекта через web, после принятия конфига main.tf ssh-ключ добавленный через web был удален.
 
-[Содержание](##Table-of-contents)
+[Содержание](#Table-of-contents)
 
 # HW7. Terraform-2
 PR: https://github.com/Otus-DevOps-2019-08/playjim_infra/pull/7
@@ -831,7 +831,7 @@ variable region {
 }
 ```
 
-[Содержание](##Table-of-contents)
+[Содержание](#Table-of-contents)
 
 # HW8. Ansible-1
 
@@ -999,7 +999,7 @@ appserver                  : ok=2    changed=1    unreachable=0    failed=0    s
 ```
 Репозиторий клонирован. Одно изменение применено.
 
-[Содержание](##Table-of-contents)
+[Содержание](#Table-of-contents)
 
 # HW9. Ansible-2
 
@@ -1211,7 +1211,7 @@ output "db_internal_ip" {
 - import_playbook: app.yml
 - import_playbook: deploy.yml 
 ```
-# Задание со *
+# Задание с *
 ---
 Для использования Dynamic Inventory для GCP можно использовать плагин Ansible gcp_compute. [Документация](https://docs.ansible.com/ansible/latest/plugins/inventory/gcp_compute.html)
 
@@ -1374,4 +1374,4 @@ inventory = ./inventory.gcp.yml
 ]
 ...
 ```
-[Содержание](##Table-of-contents)
+[Содержание](#Table-of-contents)
