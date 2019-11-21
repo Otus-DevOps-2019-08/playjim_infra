@@ -1,9 +1,8 @@
 app: #Название группы
   hosts: #Список хостов
     appserver: #Название хоста
-      ansible_host: 35.187.86.149
+      ansible_host: 104.155.53.163
 db:
   hosts:
     dbserver:
-      ansible_host: 35.241.234.153
-
+      ansible_host: 34.76.236.179

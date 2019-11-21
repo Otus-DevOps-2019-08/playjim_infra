@@ -1,6 +1,7 @@
 # playjim_infra
 playjim Infra repository by Dmitry Borisov
 ## Table of contents	
+
 - [HW2. ChatOps](#HW2-ChatOps)
   - [GIT](#GIT)
 - [HW3. GCP: Bastion Host, Pritunl VPN](#HW3-GCP-Bastion-Host-Pritunl-VPN)
@@ -34,6 +35,15 @@ playjim Infra repository by Dmitry Borisov
 	- [Работа с группами хостов](#Работа-с-группами-хостов)
 	- [YAML inventory](#YAML-inventory)
 	- [Playbook](#Playbook)
+- [HW9. Ansible-2](#HW9-Ansible-2)
+	- [Один playbook, один сценарий](#Один-playbook-один-сценарий)
+	- [Настройка инстанса приложения](#Настройка-инстанса-приложения)
+	- [Деплой](#Деплой)
+	- [Один плейбук, несколько сценариев](#Один-плейбук-несколько-сценариев)
+	- [Несколько плейбуков](#Несколько-плейбуков)
+	- [Провижинг в Packer](#Провижинг-в-Packer)
+	- [Задание с *](https://github.com/Otus-DevOps-2019-08/playjim_infra/tree/ansible-2#%D0%B7%D0%B0%D0%B4%D0%B0%D0%BD%D0%B8%D0%B5-%D1%81-)
+  
 # HW2. ChatOps
 
 PR: https://github.com/Otus-DevOps-2019-08/playjim_infra/pull/1/files
@@ -55,6 +65,8 @@ git add PULL_REQUEST_TEMPLATE.md
 git commit -m 'Add PR template'
 git push --set-upstream origin play-travis
 ```
+
+[Содержание](#Table-of-contents)
 
 # HW3. GCP: Bastion Host, Pritunl VPN
 PR: https://github.com/Otus-DevOps-2019-08/playjim_infra/pull/2/files
@@ -102,6 +114,8 @@ Host someinternalhost
 ## VPN
  - Файл setupvpn.sh описывает установку VPN-сервера, устанавливает mongod и pritunl
  - Файл cloud-bastion.ovpn - конф файл для настройки OpenVPN клиента
+
+[Содержание](#Table-of-contents)
 
 # HM4. GCP: Deploy test app, gcloud, ruby, MongoDB
 PR: https://github.com/Otus-DevOps-2019-08/playjim_infra/pull/3/files
@@ -256,6 +270,8 @@ gcloud compute firewall-rules create default-puma-server\
   --target-tags puma-server
 ```
 
+[Содержание](#Table-of-contents)
+
 # HW5. GCP: Build an Image, packer
 PR: https://github.com/Otus-DevOps-2019-08/playjim_infra/pull/4/files
 
@@ -322,6 +338,8 @@ gcloud compute instances create reddit-app-full\
   --tags puma-server\
   --restart-on-failure
  ```
+
+[Содержание](#Table-of-contents)
 
 # HW6. Terraform-1
 PR: https://github.com/Otus-DevOps-2019-08/playjim_infra/pull/6
@@ -722,6 +740,8 @@ resource "google_compute_project_metadata_item" "ssh-keys" {
 ```
  - При добавлении ssh ключа в метаданные проекта через web, после принятия конфига main.tf ssh-ключ добавленный через web был удален.
 
+[Содержание](#Table-of-contents)
+
 # HW7. Terraform-2
 PR: https://github.com/Otus-DevOps-2019-08/playjim_infra/pull/7
 
@@ -809,13 +829,11 @@ variable region {
 }
 ```
 
-
+[Содержание](#Table-of-contents)
 
 # HW8. Ansible-1
 
-PR:
-
-
+PR: https://github.com/Otus-DevOps-2019-08/playjim_infra/pull/8
 
 Установил *ansible* `$ sudo apt install ansible`
 
@@ -979,3 +997,379 @@ appserver                  : ok=2    changed=1    unreachable=0    failed=0    s
 ```
 Репозиторий клонирован. Одно изменение применено.
 
+[Содержание](#Table-of-contents)
+
+# HW9. Ansible-2
+
+## Один playbook, один сценарий
+
+Код Ansible хранится в YAML файлах, называемых
+плейбуками (playbooks) в терминологии Ansible.
+
+С помощью плейбука *reddit_app.yml* будем управлять конфигурацией и деплоем.
+
+Чтобы не запушить временные файлы Ansible, добавим в *.gitignore* `*.retry`
+
+*reddit_app.yml*:
+```sh
+---
+- name: Configure hosts & deploy application # <-- Словесное описание сценария (name)
+  hosts: all # <-- Для каких хостов будут выполняться описанные ниже таски (hosts)
+  tasks: # <-- Блок тасков (заданий), которые будут выполняться для данных хостов
+```
+
+С помощью модуля **template** скопируем конфиг MongoDB на удаленный хост:
+```sh
+...
+    - name: Change mongo config file
+      become: true # <-- Выполнить задание от root
+      template:
+        src: templates/mongod.conf.j2 # <-- Путь до локального файла-шаблона
+        dest: /etc/mongod.conf # <-- Путь на удаленном хосте
+        mode: 0644 # <-- Права на файл, которые нужно установить
+```
+С помощью тегов можно запускать отдельные таски, а не весь сценарий целиком:
+`tagsL: db-tag  # <-- Список тэгов для задачи`
+
+Применение плейбука к хостам осуществляется при помощи команды `ansible-playbook`.
+Опция `--check` позволяет произвести "пробный прогон" плейбука.
+Пример `$ ansible-playbook reddit_app.yml --check --limit db`
+`--limit` - ограничиваем группу хостов, для которыхприменить плейбук
+
+**Handlers** похожи на таски, однако запускаются только по оповещению от других задач.
+
+# Настройка инстанса приложения
+
+Модуль **copy** позволяет скопировать файл на удаленный хост.
+С помощью модуля **systemd** можно настроить автостарт Puma-сервера.
+
+Переменной db_host присваиваем значение внутреннего IP-адреса инстанса базы данных.
+Вынесем для удобства внутренние адреса инстансов в output-переменную в Terraform:
+```sh
+output "app_external_ip" {
+  value = module.app.app_external_ip
+}
+output "app_internal_ip" {
+  value = module.app.app_internal_ip
+}
+
+output "db_external_ip" {
+  value = module.db.db_external_ip
+}
+output "db_internal_ip" {
+  value = module.db.db_internal_ip
+}
+```
+# Деплой 
+
+Модуль git используются для клонирования последней версии кода нашего приложения
+А модуль bundle для установки зависимых Ruby Gems
+
+Плейбук *reddit_app.yml*:
+```sh
+---
+- name: Configure hosts & deploy application # <-- Словесное описание сценария (name)
+  hosts: all # <-- Для каких хостов будут выполняться описанные ниже таски (hosts)
+  vars:
+    mongo_bind_ip: 0.0.0.0 # <-- Переменная задается в блоке vars
+    db_host: 10.132.0.54 # <-- подставьте сюда ваш IP
+  tasks: # <-- Блок тасков (заданий), которые будут выполняться для данных хостов
+    - name: Change mongo config file
+      become: true # <-- Выполнить задание от root
+      template:
+        src: templates/mongod.conf.j2 # <-- Путь до локального файла-шаблона
+        dest: /etc/mongod.conf # <-- Путь на удаленном хосте  
+        mode: 0644 # <-- Права на файл, которые нужно установить
+      tags: db-tag # <-- Список тегов для задачи
+      notify: restart mongod
+    - name: Add unit file for Puma
+      become: true
+      copy: # <-- Модуль для копирования простого файла на удаленный сервер
+        src: files/puma.service
+        dest: /etc/systemd/system/puma.service
+      tags: app-tag
+      notify: reload puma
+    - name: Add config for DB connection
+      template:
+        src: templates/db_config.j2
+        dest: /home/appuser/db_config
+      tags: app-tag
+    - name: enable puma
+      become: true
+      systemd: name=puma enabled=yes
+      tags: app-tag
+    - name: Fetch the latest version of application code
+      git:
+        repo: 'https://github.com/express42/reddit.git'
+        dest: /home/appuser/reddit
+        version: monolith # <-- Указываем нужную ветку
+      tags: deploy-tag
+      notify: reload puma
+    - name: Bundle install
+      bundler:
+        state: present
+        chdir: /home/appuser/reddit # <-- В какой директории выполнить команду bundle
+      tags: deploy-tag
+  handlers: # <-- Добавим блок handlers и задачу
+  - name: restart mongod
+    become: true
+    service: name=mongod state=restarted
+  
+  - name: reload puma
+    become: true
+    systemd: name=puma state=restarted # <-- Настройка автостарта Puma-сервера
+```
+
+# Один плейбук, несколько сценариев
+
+Плейбук разбитый на несколько сценариев 
+- Deploy app
+- Configure app
+- Configure MongoDB
+```sh
+- name: Configure MongoDB # <-- Словесное описание сценария (name)
+  hosts: db # <-- Для каких хостов будут выполняться описанные ниже таски (hosts)
+  tags: db-tag
+  become: true # <-- Выполнить задание от root
+  vars:
+    mongo_bind_ip: 0.0.0.0 # <-- Переменная задается в блоке vars
+  tasks: # <-- Блок тасков (заданий), которые будут выполняться для данных хостов
+    - name: Change mongo config file
+      template:
+        src: templates/mongod.conf.j2 # <-- Путь до локального файла-шаблона
+        dest: /etc/mongod.conf # <-- Путь на удаленном хосте  
+        mode: 0644 # <-- Права на файл, которые нужно установить
+      notify: restart mongod    
+
+
+
+  handlers: # <-- Добавим блок handlers и задачу
+  - name: restart mongod
+    service: name=mongod state=restarted
+
+
+- name: Configure App
+  hosts: app
+  tags: app-tag
+  become: true
+  vars:
+   db_host: 10.132.0.58
+  tasks:
+    - name: Add unit file for Puma
+      copy:
+        src: files/puma.service
+        dest: /etc/systemd/system/puma.service
+      tags: app-tag
+      notify: reload puma
+
+    - name: Add config for DB connection
+      template:
+        src: templates/db_config.j2
+        dest: /home/appuser/db_config
+        owner: appuser
+        group: appuser
+
+
+    - name: enable puma
+      systemd: name=puma enabled=yes
+
+  handlers:
+  - name: reload puma
+    systemd: name=puma state=reloaded
+
+- name: Deploy App
+  hosts: app
+  tags: deploy-tag
+  tasks:
+    - name: Fetch the latest version of application code
+      git:
+        repo: 'https://github.com/express42/reddit.git'
+        dest: /home/appuser/reddit
+        version: monolith # <-- Указываем нужную ветку
+      notify: restart puma
+
+    - name: Bundle install
+      bundler:
+        state: present
+        chdir: /home/appuser/reddit # <-- В какой директории выполнить команду bundle
+
+  handlers:
+  - name: restart puma
+    become: true
+    systemd: name=puma state=restarted
+```
+    
+# Несколько плейбуков
+
+Плейбук **reddit_app_multiple_plays.yml** разбит на три файла **app.yml**, **db.yml**, **deploy.yml**)
+**site.yml** главный плейбук в котором описено управление конфигурацией всей инфраструктуры:
+```sh
+---
+- import_playbook: db.yml
+- import_playbook: app.yml
+- import_playbook: deploy.yml 
+```
+# Задание с *
+---
+Для использования Dynamic Inventory для GCP можно использовать плагин Ansible gcp_compute. [Документация](https://docs.ansible.com/ansible/latest/plugins/inventory/gcp_compute.html)
+
+Требования:
+```
+# requirements.txt
+...
+requests>=2.18.4
+google-auth>=1.3.0
+```
+
+Инвентарные файлы должны заканчиваться на `.gcp.(yml|yaml)` или `gcp_compute.(yml|yaml)`
+
+Пример ***inventory*** GCP
+```
+---
+# Имя плагина
+plugin: gcp_compute
+# Управляемые проекты
+projects:
+  - project.id
+# Файл для подключения к консоли GCP
+service_account_file: ~/path/to/key.json
+# Тип аутентификации
+auth_kind: serviceaccount
+# Отображаемая информация о хостах
+hostnames:
+  - name
+# Параметры инстанса добавления в группу
+# Делятся на группы путем поиска строки в Имени
+groups:
+  app: "'-app' in name"
+  db: "'-db' in name"
+# Переменные hostsvars
+compose:
+  # Внешние IP адреса. Используются для подключения к хостам
+  ansible_host: networkInterfaces[0].accessConfigs[0].natIP
+  # Внутренние IP адреса хостов 
+  internal_ip: networkInterfaces[0].networkIP
+
+```
+Для просмотра сформированного `.json` инвентори применить следующую команду
+```
+$ ansible-inventory -i inventory.gcp.yml --list
+```
+Для просмотра сформированного дерева инвентори
+```
+$ ansible-inventory -i inventory.gcp.yml --graph
+
+@all:
+  |--@app:
+  |  |--reddit-app
+  |--@db:
+  |  |--reddit-db
+  |--@ungrouped:
+```
+Переменные `hostvars` можно использовать в ***плейбуках***
+```
+- name: Configure App
+  hosts: app
+  #tags: app-tag
+  become: true
+  vars:
+   db_host: "{{ hostvars['reddit-db'].internal_ip }}"
+  tasks:
+    - name: Add unit file for Puma
+      copy:
+        src: files/puma.service
+        dest: /etc/systemd/system/puma.service
+      notify: reload puma
+    - name: Add config for DB connection
+      template:
+        src: templates/db_config.j2
+        dest: /home/appuser/db_config
+        owner: appuser
+        group: appuser
+    - name: enable puma
+      systemd: name=puma enabled=yes
+  handlers:
+  - name: reload puma
+    systemd: name=puma state=reloaded
+
+# Использование переменной из hostvars как список
+#    db_host: 
+#      - "{{ hostvars['reddit-db'].internal_ip }}"
+```
+```
+# Использование Dynamic Inventory по-умолчанию
+# ansible.cfg
+
+[defaults]
+inventory = ./inventory.gcp.yml
+...
+```
+# Провижинг в Packer
+Опишем провижинг в Packer с помощью плейбуков ansible.
+```
+#packer_app.yml
+
+- name: Install Ruby and Bundler
+  hosts: all
+  become: true
+  tasks:
+  - name: Install ruby na rubygems and required packages
+    apt: 
+      name: ['ruby-full', 'ruby-bundler', 'build-essential']
+      state: present
+
+```
+```
+#packer_db.yml
+
+- name: Install MongoDB
+  hosts: all
+  become: true
+  tasks:
+    - name: Add MongoDB repo key
+      apt_key:
+        url: https://www.mongodb.org/static/pgp/server-3.2.asc
+        state: present
+    - name: Add MongoDB repo
+      apt_repository:
+        repo: deb http://repo.mongodb.org/apt/ubuntu xenial/mongodb-org/3.2 multiverse
+        state: present
+        filename: mongodb-org-3.2.list
+    - name: Install and run MongoDB
+      apt:
+        update_cache: yes
+        pkg: mongodb-org
+        state: present
+      notify: start mongod
+    - name: Enable service Mongod
+      systemd: name=mongod enabled=yes
+  handlers:
+    - name: start mongod
+      systemd: name=mongod state=started
+```
+**packer_app.yml** - устанавливает Ruby и Bundler
+**packer_db.yml** - добавляет репозиторий MongoDB
+
+```
+#packer/app.json
+...
+"provisioners": [
+{
+"type": "ansible",
+"playbook_file": "ansible/packer_app.yml"
+}
+]
+...
+```
+```
+#packer/db.json
+...
+"provisioners": [
+{
+"type": "ansible",
+"playbook_file": "ansible/packer_db.yml"
+}
+]
+...
+```
+[Содержание](#Table-of-contents)
