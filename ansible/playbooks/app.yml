@@ -1,6 +1,7 @@
-- name: Configure App
+- name: Configure app hosts
   hosts: app
   become: true
+
   roles:
     - app
-    - jdauphant.nginx 
+    - jdauphant.nginx
