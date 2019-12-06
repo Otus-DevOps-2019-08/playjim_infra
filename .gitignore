@@ -6,3 +6,5 @@
 .terraform/
 *.retry
 inventory.gcp.yaml
+jdauphant.nginx
+vault.key

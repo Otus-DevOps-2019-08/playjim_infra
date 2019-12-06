@@ -37,6 +37,7 @@ playjim Infra repository by Dmitry Borisov
 	- [Работа с группами хостов](#Работа-с-группами-хостов)
 	- [YAML inventory](#YAML-inventory)
 	- [Playbook](#Playbook)
+
 - [HW9. Ansible-2](#HW9-Ansible-2)
 	- [Один playbook, один сценарий](#Один-playbook-один-сценарий)
 	- [Настройка инстанса приложения](#Настройка-инстанса-приложения)
@@ -45,7 +46,10 @@ playjim Infra repository by Dmitry Borisov
 	- [Несколько плейбуков](#Несколько-плейбуков)
 	- [Провижинг в Packer](#Провижинг-в-Packer)
 	- [Задание с *](https://github.com/Otus-DevOps-2019-08/playjim_infra/tree/ansible-2#%D0%B7%D0%B0%D0%B4%D0%B0%D0%BD%D0%B8%D0%B5-%D1%81-)
-  
+- [HW10. Ansible-3](#HW10-Ansible-3)
+  - [Ansible: работа с ролями и окружениями](#Ansible-работа-с-ролями-и-окружениями)
+  - [Деплой приложения](#Деплой-приложения)
+  - [Задание со *](#Задание-со-*)
 # HW2. ChatOps
 
 PR: https://github.com/Otus-DevOps-2019-08/playjim_infra/pull/1/files
@@ -1374,4 +1378,68 @@ inventory = ./inventory.gcp.yml
 ]
 ...
 ```
+[Содержание](#Table-of-contents)
+
+# HW10. Ansible-3
+## Ansible: работа с ролями и окружениями
+
+***Роли*** - сгруппированные в единое целое описания конфигурации (таски, хендлеры, файлы, шаблоны, переменные).
+
+**Ansible Galaxy** - инструмент для работы с ролями, созданных сообществом
+```
+$ ansible-galaxy -h
+```
+Создание структуры пустой роли
+```
+$ ansible-galaxy init <name>
+```
+Структура роли
+```
+db
+├── defaults           # Переменные по-умолчанию
+│   └── main.yml
+├── files
+├── handlers
+│   └── main.yml
+├── meta               # Информация о роли, создателе и зависимостях
+│   └── main.yml
+├── README.md
+├── tasks              # Директория для задач
+│   └── main.yml
+├── templates
+├── tests
+│   ├── inventory
+│   └── test.yml
+└── vars               # Директория для переменных, которые не должны
+    └── main.yml       #         переопределяться пользователем
+```
+## Деплой приложения
+По умолчанию в *ansible.cfg* настроем *inventory.gcp.yaml* окружения stage.
+Для деплоя приложения на prod окружении используем:
+```sh
+$ ansible-playbook -i environments/prod/inventory.gcp.yaml site.yml
+```
+**Ansible Vault** - инструмент, используемый для шифрования секретов. При выполнении плейбука секреты расшифровываются и могут быть выведены через дебаг. Следует учесть этот момент.
+
+Для шифрования используется строковый ключ. Может храниться в файли и быть указан в конфигурации.
+```
+[defaults]
+...
+vault_password_file = vault.key
+```
+Шифрование
+```
+$ ansible-vault encrypt /path/to/file
+```
+Редактирование
+```
+$ ansible-vault edit /path/to/file
+```
+Рашифрование
+```
+$ ansible-vault decrypt /path/to/file
+```
+## Задание со *
+Аналогично заданию из прошлого ДЗ
+
 [Содержание](#Table-of-contents)
