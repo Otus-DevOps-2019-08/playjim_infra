@@ -1,5 +1,5 @@
 ---
-# tasks file for app- name: Configure App
+# tasks file for app
 - name: Show info about the env this host belongs to
   debug:
     msg: "This host is in {{ env }} environment!!!"
@@ -8,6 +8,7 @@
   copy:
     src: puma.service
     dest: /etc/systemd/system/puma.service
+  notify: reload puma
 
 - name: Add config for DB connection
   template:
@@ -15,6 +16,6 @@
     dest: /home/appuser/db_config
     owner: appuser
     group: appuser
-  notify: reload puma
+
 - name: enable puma
   systemd: name=puma enabled=yes

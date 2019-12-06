@@ -1,5 +1,5 @@
-db_host: "{{ hostvars['reddit-db'].internal_ip }}"
-#db_host: 10.132.15.211
+#db_host: "{{ hostvars['reddit-db'].internal_ip }}"
+db_host: 10.132.15.211
 nginx_sites:
   default:
     - listen 80
