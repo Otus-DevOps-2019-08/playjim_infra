@@ -1,0 +1,27 @@
+---
+- name: Add MongoDB repo key
+  apt_key:
+    url: https://www.mongodb.org/static/pgp/server-3.2.asc
+    state: present
+  tags: install
+
+- name: Add MongoDB repo
+  apt_repository:
+    repo: deb http://repo.mongodb.org/apt/ubuntu xenial/mongodb-org/3.2 multiverse
+    state: present
+    filename: mongodb-org-3.2.list
+  tags: install
+
+- name: Install and run MongoDB
+  apt:
+    update_cache: yes
+    pkg: mongodb-org
+    state: present
+  tags: install
+
+- name: Configure service supervisor
+  systemd:
+    name: mongod
+    enabled: yes
+    state: started
+  tags: install

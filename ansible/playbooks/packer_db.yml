@@ -1,24 +1,6 @@
-- name: Install MongoDB
+---
+- name: Add repo for MongoDB, install and start mongod.service
   hosts: all
   become: true
-  tasks:
-    - name: Add MongoDB repo key
-      apt_key:
-        url: https://www.mongodb.org/static/pgp/server-3.2.asc
-        state: present
-    - name: Add MongoDB repo
-      apt_repository:
-        repo: deb http://repo.mongodb.org/apt/ubuntu xenial/mongodb-org/3.2 multiverse
-        state: present
-        filename: mongodb-org-3.2.list
-    - name: Install and run MongoDB
-      apt:
-        update_cache: yes
-        pkg: mongodb-org
-        state: present
-      notify: start mongod
-    - name: Enable service Mongod
-      systemd: name=mongod enabled=yes
-  handlers:
-    - name: start mongod
-      systemd: name=mongod state=started
+  roles:
+    - db

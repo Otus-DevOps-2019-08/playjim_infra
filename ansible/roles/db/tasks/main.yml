@@ -4,9 +4,7 @@
   debug:
     msg: "This host is in {{ env }} environment!!!"
 
-- name: Configure MongoDB # <-- Словесное описание сценария (name)
-  template:
-    src: mongod.conf.j2 # <-- Указываем имя шаблона в качестве источника
-    dest: /etc/mongod.conf # <-- Путь на удаленном хосте
-    mode: 0644 # <-- Права на файл, которые нужно установить
-  notify: restart mongod
+- include: install_mongo.yml
+  tags: 
+    - install_mongo
+- include: config_mongo.yml

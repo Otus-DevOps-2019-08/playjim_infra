@@ -50,6 +50,11 @@ playjim Infra repository by Dmitry Borisov
   - [Ansible: работа с ролями и окружениями](#Ansible-работа-с-ролями-и-окружениями)
   - [Деплой приложения](#Деплой-приложения)
   - [Задание со *](#Задание-со-*)
+
+- [HW11. Ansible-4](#HW11-Ansible-4)
+  - [Разработка и тестирование Ansible ролей и плейбуков](#Разработка-и-тестирование-Ansible-ролей-и-плейбуков)
+  - [Самостоятельное задание](#Самостоятельное-задание)
+
 # HW2. ChatOps
 
 PR: https://github.com/Otus-DevOps-2019-08/playjim_infra/pull/1/files
@@ -1442,4 +1447,171 @@ $ ansible-vault decrypt /path/to/file
 ## Задание со *
 Аналогично заданию из прошлого ДЗ
 
+[Содержание](#Table-of-contents)
+
+
+# HW11. Ansible-4
+## Разработка и тестирование Ansible ролей и плейбуков
+
+**VirtualBox**
+
+**!** Не устанавливать в виртуальную среду внутри виртуальной машины. Для нормальной работы требует:
+- Intel VT-x/EPT или AMD-V/RVI
+- Счетчики производительности виртуализации процессора
+
+Работает внутри виртуальной машины VMware Workstation.
+
+**Vagrant**
+
+- [Базовые команды Vagrant](https://gist.github.com/wpscholar/a49594e2e2b918f4d0c4)
+- [Поддерживаемые провайдеры](https://www.vagrantup.com/docs/providers/)
+- [Установка](https://www.vagrantup.com/downloads.html)
+- [Конфигурация](https://www.vagrantup.com/docs/vagrantfile/)
+- [Репозиторий Box-образов](https://app.vagrantup.com)
+
+Конфигурация хранится в `Vagrantfile`. Примеры:
+```
+Vagrant.configure("2") do |config|
+
+  # Указание провайдера и его настроек
+  config.vm.provider :virtualbox do |v|
+    # Кол-во оперативной памяти VM
+    v.memory = 1024
+  end
+
+  # Описание и настройки VM
+  config.vm.define "dbserver" do |db|
+    # Наименование образа
+    db.vm.box = "ubuntu/xenial64"
+    db.vm.hostname = "dbserver"
+    db.vm.network :private_network, ip: "10.10.10.10"
+
+    # Провиженеры и их настройки
+    db.vm.provision "ansible" do |ansible|
+      ansible.playbook = "playbooks/site.yml"
+      ansible.groups = {
+        "db" => ["dbserver"],
+        # Переменные для Ansible
+        "db:vars" => {"mongo_bind_ip" => "0.0.0.0"}
+      }
+      end
+  end
+end
+```
+Путь до рабочих папок Vagrant-a
+```
+# В директории, где находится Vagrantfile
+.vagrant/
+# Автоматически сгенерированный инвентори Ansible
+.vagrant/provisioners/ansible/inventory/vagrant_ansible_inventory
+```
+**Ansible**
+
+Установка Python, если его нет на целевой машине
+```
+---
+- name: Check && install python
+  hosts: all
+  become: true
+  # Пропуск сбора фактов, т.к. требует Python
+  gather_facts: False
+
+  tasks:
+    - name: Install python for Ansible
+      # Исполнение команд, используя shell
+      raw: test -e /usr/bin/python || (apt -y update && apt install -y python-minimal)
+      changed_when: False
+```
+Запуск задания в зависимости от типа виртуализации
+```
+# Модификация systemctl внутри Docker-a
+# так как он не поддерживает его "из коробки"
+---
+- name: Install systemctl when docker
+  copy:
+    src: systemctl.py
+    dest: /bin/systemctl
+  # Запуск, если соблюдено условие
+  when: "ansible_virtualization_type == 'docker'"
+```
+Просмотр всех переменных Ansible
+```
+$ ansible all -m setup
+```
+! При большом количестве заданий рекомендуется группировать их и распределять в отдельные файлы. При групперовке при помощи `include` важен порядок. Задачи выполняются по порядку сверху вниз.
+
+Дебаг сообщения. Отображаются перед выполнением заданий
+```
+- name: Show info about the env this host belongs to
+  debug:
+    msg: "This host is in {{ env }} environment!!!"
+```
+
+**Molecule и Testinfra**
+
+- [Документация Molecule](https://molecule.readthedocs.io/en/stable/)
+- [Документация Testinfra](https://testinfra.readthedocs.io/en/latest/)
+
+Используются для локального тестирования ролей Ansible.
+
+Зависимости
+```
+molecule>=2.6
+testinfra>=1.10
+python-vagrant>=0.5.15
+``` 
+Создание сценария и инициализация Molecule
+```
+$ molecule init scenario --scenario-name <name> -r <role_name> -d vagrant
+# -d - Драйвер
+```
+Путь до тестов
+```
+molecule/<scenario_name>/tests/test_default.py
+```
+Путь до описания тестовой машины
+```
+molecule/<scenario_name>/molecule.yml
+```
+Создание тестовой машины
+```
+$ molecule create
+```
+Список созданных инстансов
+```
+$ molecule list
+```
+Подключение к инстансу по SSH
+```
+$ molecule login -h instance
+```
+Путь до плейбука для тестируемой роли
+```
+molecule/<scenario_name>/playbook.yml
+```
+Применение конфигурации (провиженинг)
+```
+$ molecule converge
+```
+Запуск тестов
+```
+$ molecule verify 
+```
+## Самостоятельное задание
+Проверка портов при помощи [модулей](http://testinfra.readthedocs.io/en/latest/modules.html) Testinfra
+```
+def test_listening_port(host):
+    assert host.socket("tcp://0.0.0.0:27017").is_listening
+```
+Указание дополнительных аргументов и переменных окружения Ansible в конфигурации Packer
+```
+{
+	"type": "ansible",
+	"playbook_file": "ansible/playbooks/packer_app.yml",
+  # Переменные окружения
+	"ansible_env_vars": ["ANSIBLE_ROLES_PATH={{ pwd }}/ansible/roles"],
+  # Дополнительные аргументы
+	"extra_arguments": ["--tags", "ruby"]
+}
+```
 [Содержание](#Table-of-contents)
