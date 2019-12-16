@@ -1520,18 +1520,7 @@ end
       raw: test -e /usr/bin/python || (apt -y update && apt install -y python-minimal)
       changed_when: False
 ```
-Запуск задания в зависимости от типа виртуализации
-```
-# Модификация systemctl внутри Docker-a
-# так как он не поддерживает его "из коробки"
----
-- name: Install systemctl when docker
-  copy:
-    src: systemctl.py
-    dest: /bin/systemctl
-  # Запуск, если соблюдено условие
-  when: "ansible_virtualization_type == 'docker'"
-```
+
 Просмотр всех переменных Ansible
 ```
 $ ansible all -m setup
